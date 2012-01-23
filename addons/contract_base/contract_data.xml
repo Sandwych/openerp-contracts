@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <!-- 合同分类初始数据 -->
+        <record model="contract.category" id="cc_all">
+            <field name="name">其他分类</field>
+            <field name="summary">说明</field>
+        </record>
+
+        <record model="contract.category" id="cc_sales">
+            <field name="name">销售合同</field>
+            <field name="summary">说明</field>
+        </record>
+
+        <record model="contract.category" id="cc_purchase">
+            <field name="name">采购合同</field>
+            <field name="summary">说明</field>
+        </record>
+
+        <record model="contract.category" id="cc_leasing">
+            <field name="name">租赁合同</field>
+            <field name="summary">说明</field>
+        </record>
+
+
+
+
+        <!--
+        <record id="base.user_demo" model="res.users">
+            <field name="groups_id" eval="[(4,ref('base.group_tool_user'))]"/> 
+        </record>
+        -->
+    </data>
+</openerp>
+

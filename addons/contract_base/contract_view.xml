@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <!-- 基础菜单定义 -->
+        <menuitem name="合同管理"
+            id="menu_contract" sequence="20" />
+
+        <menuitem name="业务伙伴" parent="menu_contract"
+            id="menu_contract_partner" sequence="1000" />
+
+        <menuitem id="base.menu_address_book" name="地址簿" parent="menu_contract_partner" sequence="2" />
+
+        <menuitem id="base.menu_product" name="标的物" 
+            parent="menu_contract" sequence="2000"/>
+
+        <menuitem name="报表" parent="menu_contract"
+            id="menu_contract_reporting" sequence="9999" />
+
+        <menuitem name="配置" parent="menu_contract"
+            id="menu_contract_config" sequence="10000" />
+
+        <!-- ************************** 合同分类相关 *************************** -->
+        <!-- 合同分类表单视图 -->
+        <record model="ir.ui.view" id="view_contract_category_form">
+            <field name="name">合同分类</field>
+            <field name="model">contract.category</field>
+            <field name="arch" type="xml">
+                <form string="合同分类">
+                    <group colspan="2" col="4">
+                        <field name="name" select="1"/>
+                        <field name="parent_id" select="1"/>
+                        <newline/>
+                        <field name="summary" />
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <!-- 合同分类列表树视图 -->
+        <record model="ir.ui.view" id="view_contract_category_tree">
+            <field name="name">合同分类</field>
+            <field name="model">contract.category</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="合同分类">
+                    <field name="name"/>
+                    <field name="parent_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- 合同分类动作定义 -->
+        <record model="ir.actions.act_window" id="action_contract_category_form">
+            <field name="name">合同分类</field>
+            <field name="res_model">contract.category</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- 合同分类菜单定义 -->
+        <menuitem name="合同分类" parent="menu_contract_config"
+            id="menu_contract_category" action="action_contract_category_form" />
+
+
+        <!-- ************************** 合同文书管理相关 *************************** -->
+        <!-- 合同文书表单视图 -->
+        <record model="ir.ui.view" id="view_contract_form">
+            <field name="name">contract.contract.form</field>
+            <field name="model">contract.contract</field>
+            <field name="arch" type="xml">
+                <form string="合同分类">
+                    <field name="name" select="1" />
+                    <field name="title" select="1" />
+                    <newline />
+                    <notebook colspan="4">
+                        <page string="基本信息">
+                            <field name="category" select="1" />
+                            <newline/>
+                            <field name="partner1" select="1" />
+                            <field name="partner2" select="1" />
+                            <field name="start_date" select="1" />
+                            <field name="end_date" select="1" />
+                            <!--
+                            <newline/>
+                            <field colspan="4" mode="tree,form" name="lines" nolabel="1" widget="one2many_list">
+                            </field>
+                            -->
+                        </page>
+                        <page string="标的物">
+                        </page>
+                        <page string="收付款">
+                        </page>
+                        <page string="合同变更历史">
+                        </page>
+                        <page string="备注">
+                            <field name="notes" select="2" nolabel="1" />
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+
+        <!-- 合同列表树视图 -->
+        <record model="ir.ui.view" id="view_contract_tree">
+            <field name="name">contract.contract.tree</field>
+            <field name="model">contract.contract</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="合同">
+                    <field name="name" />
+                    <field name="title" />
+                    <field name="start_date" />
+                    <field name="end_date" />
+                    <field name="partner1" />
+                    <field name="partner2" />
+                    <field name="category" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- 合同日历视图 -->
+        <record id="view_contract_calendar" model="ir.ui.view">
+            <field name="name">contract.contract.calendar</field>
+            <field name="model">contract.contract</field>
+            <field name="type">calendar</field>
+            <field eval="2" name="priority"/>
+            <field name="arch" type="xml">
+                <calendar date_start="start_date" string="合同一览表">
+                    <field name="name"/>
+                    <field name="title"/>
+                </calendar>
+            </field>
+        </record>
+
+
+        <!-- 合同动作定义 -->
+        <record model="ir.actions.act_window" id="action_contract_form">
+            <field name="name">contract.contract.form_action</field>
+            <field name="res_model">contract.contract</field>
+            <field name="view_mode">tree,form,calendar</field>
+        </record>
+
+        <!-- 合同分类菜单定义 -->
+        <menuitem name="合同" parent="menu_contract" sequence="10"
+            id="menu_contract_contract" action="action_contract_form" />
+
+    </data>
+</openerp>
+
