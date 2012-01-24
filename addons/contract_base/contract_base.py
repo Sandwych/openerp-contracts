@@ -14,7 +14,7 @@ class ContractGroup(osv.osv):
         'name': fields.char('分组名称', size=256, required=True),
         'start_date': fields.date('起始日期', required=True),
         'end_date': fields.date('截止日期', required=True),
-        'notes': fields.text('简介'),
+        'note': fields.text('简介'),
         'contracts': fields.one2many('contract.contract', 'group', '合同'),# readonly=True, states={'draft': [('readonly', False)]}),
         'company_id': fields.many2one('res.company', '合同组所属机构', required=False),
     }
@@ -38,6 +38,8 @@ class Category(osv.osv):
         'summary': fields.text('简介'),
         'parent_id': fields.many2one('contract.category', '上级分类', ondelete='set null'),
         'child_ids': fields.one2many('contract.category', 'parent_id', '下级分类'),
+        'report_template': fields.binary('合同文档模板', required=False, \
+            help="如果一个合同指定了属于此分类，那么将使用此模板文件打印合同文档。此模板应使用 .ODT 格式。"),
     }
     _sql_constraints = [
         ('name', 'unique(parent_id,name)', '分类名称必须唯一' )
@@ -55,20 +57,25 @@ class Contract(osv.osv):
         'name': fields.char('合同号', size=128, required=True),
         'title': fields.char('合同标题', size=512, required=True),
         'group': fields.many2one('contract.group', '所属分组', required=False, ondelete='set null'),
+        'sign_date': fields.date('订立日期', required=True),
         'start_date': fields.date('起始日期', required=True),
         'end_date': fields.date('截止日期', required=True),
         'category': fields.many2one('contract.category', '合同分类', required=True),
         'partner1': fields.many2one('res.partner', '甲方', required=True),
         'partner2': fields.many2one('res.partner', '乙方', required=True),
-        'notes': fields.text('简介'),
+        'note': fields.text('简介'),
         'lines': fields.one2many('contract.contract.line', 'contract_id', '标的物收付计划'),# readonly=True, states={'draft': [('readonly', False)]}),
         'fund_lines': fields.one2many('contract.contract.fund_line', 'contract_id', '资金计划'),# readonly=True, states={'draft': [('readonly', False)]}),
-        'company_id': fields.related('group', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
+        'company_id': fields.related('group', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
+        'type': fields.selection([('pay', '付款'), ('buy', '收款')], '资金性质', required=True),
     }
     _sql_constraints = [
         ('name', 'unique(name)', '合同号必须唯一' )
     ]
     _order = 'start_date desc, end_date desc, name asc'
+    _defaults = {
+        'sign_date': lambda *a: time.strftime('%Y-%m-%d'),
+    }
 
 Contract()
 
@@ -85,7 +92,7 @@ class ContractLine(osv.osv):
         'uom': fields.many2one('product.uom', '计量单位', required=True),
         'quantity': fields.float('数量（按单位计）', digits=(16, 2), required=True),
         'planned_date': fields.date('计划收付日期', required=True),
-        'notes': fields.text('备注'),
+        'note': fields.text('备注'),
         'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
     }
     _order = 'sequence asc, id desc'
@@ -103,9 +110,9 @@ class ContractFundLine(osv.osv):
         'sequence': fields.integer('序号', help='序号，用于指定该记录在列表中显示的顺序，数字越小越靠前，不要求连续'),
         'planned_date': fields.date('计划收付日期', required=True),
         'type': fields.char('结算方式', size=256, required=True, select=True),
-        'payterm': fields.char('资金条款', size=256, required=True, select=True),
+        'payment_term': fields.char('资金条款', size=256, required=False),
         'amount': fields.float('金额', required=True),
-        'notes': fields.text('备注'),
+        'note': fields.text('备注'),
         'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
     }
     _order = 'sequence asc, id desc'

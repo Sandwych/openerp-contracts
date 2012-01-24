@@ -36,7 +36,7 @@
                             <field colspan="4" mode="tree,form" name="contracts" nolabel="1" widget="one2many_list" />
                         </page>
                         <page string="备注">
-                            <field colspan="4" nolabel="1" name="notes" select="2" />
+                            <field colspan="4" nolabel="1" name="note" select="2" />
                         </page>
                     </notebook>
                 </form>
@@ -93,8 +93,9 @@
                     <group colspan="2" col="4">
                         <field name="name" select="1"/>
                         <field name="parent_id" select="1"/>
+                        <field name="report_template" />
                         <newline/>
-                        <field name="summary" />
+                        <field name="summary" colspan="4" />
                     </group>
                 </form>
             </field>
@@ -142,6 +143,9 @@
                             <newline/>
                             <field name="partner1" select="1" />
                             <field name="partner2" select="1" />
+                            <field name="type" select="1" />
+                            <field name="sign_date" select="1" />
+                            <newline/>
                             <field name="start_date" select="1" />
                             <field name="end_date" select="1" />
                             <newline/>
@@ -154,7 +158,7 @@
                                     <field name="planned_date" />
                                     <field name="sequence" />
                                     <newline/>
-                                    <field name="notes" colspan="4" />
+                                    <field name="note" colspan="4" />
                                 </form>
                                 <tree string="标的物收付计划" >
                                     <field name="name" colspan="4" />
@@ -172,16 +176,16 @@
                                     <field name="sequence" />
                                     <field name="planned_date" />
                                     <field name="type" />
-                                    <field name="payterm" />
+                                    <field name="payment_term" />
                                     <field name="amount" />
                                     <newline/>
-                                    <field name="notes" colspan="4" />
+                                    <field name="note" colspan="4" />
                                 </form>
                                 <tree string="收付款计划" >
                                     <field name="name" colspan="4" />
                                     <field name="planned_date" />
                                     <field name="type" />
-                                    <field name="payterm" />
+                                    <field name="payment_term" />
                                     <field name="amount" />
                                 </tree>
                             </field>
@@ -189,7 +193,7 @@
                         <page string="合同变更历史">
                         </page>
                         <page string="备注">
-                            <field name="notes" select="2" nolabel="1" />
+                            <field name="note" select="2" nolabel="1" />
                         </page>
                     </notebook>
                 </form>
@@ -206,6 +210,8 @@
                     <field name="name" />
                     <field name="title" colspan="4" />
                     <field name="group" />
+                    <field name="type" />
+                    <field name="sign_date" />
                     <field name="start_date" />
                     <field name="end_date" />
                     <field name="partner1" colspan="4" />
