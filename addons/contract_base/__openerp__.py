@@ -11,12 +11,12 @@
     用于合同管理的基础模块。
     写更多的简介....
     """,
-    'author': '作者',
+    'author': '李维',
     'website': 'http://www.dynastech.com',
-    'depends': ['base', 'product'],
+    'depends': ['base', 'product', 'board'],
     'init_xml': [],
     'update_xml': [
-        #'security/idea_security.xml',
+        'security/contract_security.xml',
         #'security/ir.model.access.csv',
         #'wizard/idea_post_vote_view.xml',
         'contract_data.xml', #这行在开发完成之后放到 init_xml 里
@@ -31,5 +31,6 @@
         #'test/test_idea.yml'
     ],
     'installable': True,
+    'application': True,
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
