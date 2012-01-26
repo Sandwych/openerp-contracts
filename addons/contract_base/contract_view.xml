@@ -238,7 +238,6 @@
             <field name="type">calendar</field>
             <field name="arch" type="xml">
                 <calendar color="state" date_start="end_date" string="合同一览表">
-                    <field name="partner2"/>
                     <field name="name"/>
                 </calendar>
             </field>
