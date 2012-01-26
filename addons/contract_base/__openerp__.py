@@ -22,7 +22,7 @@
         'contract_data.xml', #这行在开发完成之后放到 init_xml 里
         'contract_view.xml',
         'contract_workflow.xml',
-        #'report/report_vote_view.xml',
+        'report/contract_report_view.xml',
     ],
     'demo_xml': [
         "contract_demo.xml"
