@@ -215,7 +215,7 @@
             <field name="model">contract.contract</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="合同">
+                <tree string="合同" colors=" blue:state == 'draft'; gray:state == 'done' " >
                     <field name="name" colspan="4" />
                     <field name="code" />
                     <field name="group" />
@@ -223,8 +223,8 @@
                     <field name="end_date" />
                     <field name="partner2" colspan="4" />
                     <field name="category" />
-                    <field name="total_amount" />
-                    <field name="paid_amount" />
+                    <field name="total_amount" sum="合同资金总计" />
+                    <field name="paid_amount" sum="合同已收付资金总计" />
                     <field name="paid_rate" widget="progressbar" />
                     <field name="state" />
                 </tree>

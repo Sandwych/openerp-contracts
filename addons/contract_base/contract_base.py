@@ -82,21 +82,24 @@ class Contract(osv.osv):
     def _paid_amount(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
-            total_amount = 0
-            for l in o.fund_lines:
-                total_amount = total_amount + l.paid_amount
+            total_amount = 0.0
+            for fl in o.fund_lines:
+                total_amount = total_amount + fl.paid_amount
             result[o.id] = total_amount
         return result
 
     def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
-            total_amount = 0
-            paid_amount = 0
-            for l in o.fund_lines:
-                total_amount = total_amount + l.amount
-                paid_amount = paid_amount + l.paid_amount
-            result[o.id] = round(100 * paid_amount / total_amount, 2)
+            total_amount = 0.0
+            paid_amount = 0.0
+            for fl in o.fund_lines:
+                total_amount = total_amount + fl.amount
+                paid_amount = paid_amount + fl.paid_amount
+            if paid_amount < 0.0001:
+                result[o.id] = 0.0
+            else:
+                result[o.id] = round(100.0 * paid_amount / total_amount, 2)
         return result
 
 
@@ -175,9 +178,9 @@ class ContractFundLine(osv.osv):
     def _paid_amount(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         sql = '''
-        SELECT l.id, sum(p.amount)
+        SELECT l.id, SUM(p.amount)
             FROM contract_contract_fund_line l
-            INNER JOIN contract_contract_fund_payment p ON p.fund_line = l.id
+            LEFT JOIN contract_contract_fund_payment p ON p.fund_line = l.id
             WHERE l.id IN %s GROUP BY l.id
         '''
         cursor.execute(sql, (tuple(ids),))
@@ -188,7 +191,11 @@ class ContractFundLine(osv.osv):
     def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
-            result[o.id] = round(100.0 * o.paid_amount / o.amount, 2)
+            paid_amount = o.paid_amount
+            if paid_amount < 0.0001:
+                result[o.id] = 0.0
+            else:
+                result[o.id] = round(100.0 * o.paid_amount / o.amount, 2)
         return result
 
     _columns = {

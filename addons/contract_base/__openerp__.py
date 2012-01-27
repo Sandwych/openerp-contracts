@@ -13,7 +13,7 @@
     """,
     'author': '李维',
     'website': 'http://www.dynastech.com',
-    'depends': ['base', 'product', 'board'],
+    'depends': ['base', 'report_aeroo', 'product', 'board'],
     'init_xml': [],
     'update_xml': [
         'security/contract_security.xml',
@@ -23,6 +23,7 @@
         'contract_view.xml',
         'contract_workflow.xml',
         'report/contract_report_view.xml',
+        'report/contract_report.xml',
     ],
     'demo_xml': [
         "contract_demo.xml"

@@ -42,7 +42,7 @@
         <field name="name">合同经理：可见所有的合同</field>
         <field name="model_id" ref="model_contract_contract"/>
         <field name="domain_force">[(1,'=',1)]</field>
-        <field name="groups" eval="[(4,ref('contract.group_contract_manager'))]"/>
+        <field name="groups" eval="[(4,ref('group_contract_manager'))]"/>
     </record>
 </data>
 </openerp>

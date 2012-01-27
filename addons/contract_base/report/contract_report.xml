@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<openerp>
+<data noupdate="0">
+
+    <record id="contract_document_report_id" model="ir.actions.report.xml">
+        <field name="name">生成合同文档</field>
+        <field name="type">ir.actions.report.xml</field>
+        <field name="model">contract.contract</field>
+        <field name="report_name">contract_document_report</field>
+        <field name="report_type">aeroo</field>
+        <field name="in_format">oo-odt</field>
+        <field name="parser_loc">contract_base/report/parsers.py</field>
+        <field name="report_rml">contract_base/report/contract_template.odt</field>
+        <field name="parser_state">loc</field>
+        <field name="tml_source">file</field>
+    </record>
+
+    <ir_set>
+        <field eval="'action'" name="key"/>
+        <field eval="'client_print_multi'" name="key2"/>
+        <field eval="['contract.contract']" name="models"/>
+        <field name="name">生成合同文档</field>
+        <field eval="'ir.actions.report.xml,'+str(contract_document_report_id)" name="value"/>
+        <field eval="True" name="isobject"/>
+        <field eval="True" name="replace"/>
+    </ir_set>
+
+</data>
+</openerp>
+

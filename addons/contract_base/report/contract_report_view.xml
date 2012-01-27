@@ -73,9 +73,9 @@
                     <group expand="1" string="分组于...">
                         <filter string="组织机构" icon="terp-go-home" context="{'group_by':'company_id'}"  groups="base.group_multi_company"/>
                         <separator orientation="vertical"/>
-                        <filter string="当日" icon="terp-go-today" context="{'group_by':'day'}" />
-                        <filter string="当月" icon="terp-go-month" context="{'group_by':'month'}" />
-                        <filter string="当年" icon="terp-go-year" context="{'group_by':'year'}" />
+                        <filter string="日" icon="terp-go-today" context="{'group_by':'day'}" />
+                        <filter string="月" icon="terp-go-month" context="{'group_by':'month'}" />
+                        <filter string="年" icon="terp-go-year" context="{'group_by':'year'}" />
                     </group>
                 </search>
             </field>
