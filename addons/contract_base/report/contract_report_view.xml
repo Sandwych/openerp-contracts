@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <record id="view_contract_category_tree" model="ir.ui.view">
+        <record id="view_contract_report_category_tree" model="ir.ui.view">
             <field eval="1" name="priority"/>
             <field name="name">contract.report.fund_by_category.tree</field>
             <field name="model">report.contract.fund_by_category</field>
@@ -24,7 +24,7 @@
             </field>
         </record>
 
-        <record id="view_contract_category_graph" model="ir.ui.view">
+        <record id="view_contract_report_category_graph" model="ir.ui.view">
             <field name="name">contract.report.fund_by_category.graph</field>
             <field name="model">report.contract.fund_by_category</field>
             <field name="type">graph</field>
@@ -37,7 +37,7 @@
             </field>
         </record>
 
-        <record id="view_contract_category_search" model="ir.ui.view">
+        <record id="view_contract_report_category_search" model="ir.ui.view">
             <field name="name">contract.report.fund_by_category.search</field>
             <field name="model">report.contract.fund_by_category</field>
             <field name="type">search</field>
@@ -86,8 +86,8 @@
             <field name="res_model">report.contract.fund_by_category</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,graph</field>
-            <field name="view_id" ref="view_contract_category_graph"/>
-            <field name="search_view_id" ref="view_contract_category_search"/>
+            <field name="view_id" ref="view_contract_report_category_graph"/>
+            <field name="search_view_id" ref="view_contract_report_category_search"/>
             <field name="context">{'search_default_year':1,'group_by_no_leaf':1,'group_by':[]}</field>
         </record>
 
