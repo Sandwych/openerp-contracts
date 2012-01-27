@@ -9,10 +9,12 @@
         <field name="report_name">contract_document_report</field>
         <field name="report_type">aeroo</field>
         <field name="in_format">oo-odt</field>
-        <field name="parser_loc">contract_base/report/parsers.py</field>
+        <field name="parser_loc">contract_base/report/parser.py</field>
+        <!--
         <field name="report_rml">contract_base/report/contract_template.odt</field>
+        -->
         <field name="parser_state">loc</field>
-        <field name="tml_source">file</field>
+        <field name="tml_source">parser</field>
     </record>
 
     <ir_set>
