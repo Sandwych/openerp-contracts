@@ -16,9 +16,9 @@
         <menuitem name="业务伙伴" parent="menu_contract"
             id="menu_contract_partner" sequence="1000" />
 
-        <menuitem id="base.menu_address_book" name="地址簿" parent="menu_contract_partner" sequence="2" />
+        <menuitem id="menu_contract_customers" name="客户" parent="menu_contract_partner" sequence="2" action="base.action_partner_form" />
 
-        <menuitem id="base.menu_product" name="标的物" 
+        <menuitem id="base.menu_product" name="产品" 
             parent="menu_contract" sequence="2000"/>
 
         <menuitem name="配置" parent="menu_contract"
@@ -31,10 +31,12 @@
             <field name="model">contract.group</field>
             <field name="arch" type="xml">
                 <form string="合同分组">
-                    <field name="name" select="1" />
-                    <field name="start_date" select="1" />
-                    <field name="end_date" select="1" />
-                    <newline/>
+                    <group>
+                        <field name="name" select="1" />
+                        <field name="start_date" select="1" />
+                        <field name="end_date" select="1" />
+                        <field name="user_id" />
+                    </group>
                     <notebook colspan="4">
                         <page string="包含合同">
                             <field colspan="4" mode="tree,form" name="contracts" nolabel="1" widget="one2many_list" />
@@ -60,6 +62,7 @@
                     <field name="total_amount" sum="计划收付总金额" />
                     <field name="paid_amount" sum="已收付总金额" />
                     <field name="paid_rate" widget="progressbar" />
+                    <field name="user_id" />
                 </tree>
             </field>
         </record>
@@ -145,9 +148,10 @@
             <field name="model">contract.contract</field>
             <field name="arch" type="xml">
                 <form string="合同">
-                    <field name="name" select="1" />
-                    <field name="code" select="1" />
-                    <newline />
+                    <group>
+                        <field name="name" select="1" />
+                        <field name="code" select="1" />
+                    </group>
                     <notebook colspan="4">
                         <page string="基本信息">
                             <field name="group" select="1" />
@@ -155,13 +159,14 @@
                             <newline/>
                             <field name="partner1" select="1" />
                             <field name="partner2" select="1" />
+                            <field name="user_id" />
                             <field name="sign_date" select="1" />
                             <newline/>
                             <field name="start_date" select="1" />
                             <field name="end_date" select="1" />
                             <newline/>
                             <field colspan="4" mode="tree,form" name="lines" nolabel="1" widget="one2many_list">
-                                <form string="标的物收付计划">
+                                <form string="收发货计划">
                                     <field colspan="4" name="name" />
                                     <field colspan="4" name="product" on_change="onchange_product(product, quantity)" />
                                     <field name="uom" />
@@ -171,7 +176,7 @@
                                     <newline/>
                                     <field name="note" colspan="4" />
                                 </form>
-                                <tree string="标的物收付计划" >
+                                <tree string="收发货计划" >
                                     <field name="name" colspan="4" />
                                     <field name="product" colspan="4" />
                                     <field name="uom" />
@@ -187,7 +192,7 @@
                         </page>
                         <page string="款项">
                             <field colspan="4" mode="tree,form" name="fund_lines" nolabel="1" widget="one2many_list">
-                                <form string="款项收付计划">
+                                <form string="收付款计划">
                                     <field colspan="4" name="name" />
                                     <field name="planned_date" />
                                     <field name="type" />
@@ -197,7 +202,7 @@
                                     <newline/>
                                     <field name="note" colspan="4" />
                                 </form>
-                                <tree string="款项收付计划" >
+                                <tree string="收付款计划" >
                                     <field name="name" colspan="4" />
                                     <field name="planned_date" />
                                     <field name="type" />
@@ -277,14 +282,14 @@
             id="menu_contract_contract" action="action_contract_form" />
 
 
-        <!-- ************************** 合同款项收付计划相关 *************************** -->
+        <!-- ************************** 合同收付款计划相关 *************************** -->
         <!-- 合同列表树视图 -->
         <record model="ir.ui.view" id="view_contract_fund_line_tree">
             <field name="name">contract.contract.fund_line.tree</field>
             <field name="model">contract.contract.fund_line</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="款项收付计划" >
+                <tree string="收付款计划" >
                     <field name="contract_id" />
                     <field name="name" colspan="4" />
                     <field name="planned_date" />
@@ -298,13 +303,13 @@
         </record>
 
 
-        <!-- ************************** 合同款项收付记录相关 *************************** -->
-        <!-- 款项收付记录表单视图 -->
+        <!-- ************************** 合同收付款记录相关 *************************** -->
+        <!-- 收付款记录表单视图 -->
         <record model="ir.ui.view" id="view_contract_fund_payment_form">
-            <field name="name">合同款项收付记录</field>
+            <field name="name">合同收付款记录</field>
             <field name="model">contract.contract.fund_payment</field>
             <field name="arch" type="xml">
-                <form string="合同款项收付记录">
+                <form string="合同收付款记录">
                     <group colspan="2" col="4">
                         <field name="contract" select="1" />
                         <field name="fund_line" select="1" />
@@ -320,13 +325,13 @@
             </field>
         </record>
 
-        <!-- 款项收付记录列表树视图 -->
+        <!-- 收付款记录列表树视图 -->
         <record model="ir.ui.view" id="view_contract_fund_payment_tree">
-            <field name="name">合同款项收付记录</field>
+            <field name="name">合同收付款记录</field>
             <field name="model">contract.contract.fund_payment</field>
             <field name="type">tree</field>
             <field name="arch" type="xml">
-                <tree string="合同款项收付记录">
+                <tree string="合同收付款记录">
                     <field name="contract" />
                     <field name="fund_line" />
                     <field name="name"/>
@@ -338,29 +343,29 @@
             </field>
         </record>
 
-        <!-- 款项收付记录日历视图 -->
+        <!-- 收付款记录日历视图 -->
         <record id="view_fund_payment_calendar" model="ir.ui.view">
             <field name="name">contract.contract.fund_payment.calendar</field>
             <field name="model">contract.contract.fund_payment</field>
             <field name="type">calendar</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
-                <calendar date_start="pay_date" string="款项收付记录一览表" color="contract">
+                <calendar date_start="pay_date" string="收付款记录一览表" color="contract">
                     <field name="name"/>
                     <field name="amount"/>
                 </calendar>
             </field>
         </record>
 
-        <!-- 款项收付记录动作定义 -->
+        <!-- 收付款记录动作定义 -->
         <record model="ir.actions.act_window" id="action_contract_fund_payment_form">
-            <field name="name">合同款项收付记录</field>
+            <field name="name">合同收付款记录</field>
             <field name="res_model">contract.contract.fund_payment</field>
             <field name="view_mode">tree,form,calendar</field>
         </record>
 
-        <!-- 款项收付记录菜单定义 -->
-        <menuitem name="款项收付记录" parent="menu_contract_performance" sequence="1000"
+        <!-- 收付款记录菜单定义 -->
+        <menuitem name="收付款记录" parent="menu_contract_performance" sequence="1000"
             id="menu_contract_fund_payment" action="action_contract_fund_payment_form" />
     </data>
 </openerp>

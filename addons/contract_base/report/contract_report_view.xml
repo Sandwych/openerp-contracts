@@ -19,6 +19,7 @@
                     <field name="start_date" invisible="1" />
                     <field name="end_date" invisible="1" />
                     <field name="sign_date" invisible="1" />
+                    <field name="partner2" invisible="1" />
                     <field name="company_id" invisible="1" groups="base.group_multi_company"/>
                 </tree>
             </field>
@@ -76,13 +77,15 @@
                         <filter string="日" icon="terp-go-today" context="{'group_by':'day'}" />
                         <filter string="月" icon="terp-go-month" context="{'group_by':'month'}" />
                         <filter string="年" icon="terp-go-year" context="{'group_by':'year'}" />
+                        <separator orientation="vertical"/>
+                        <filter string="乙方" icon="terp-partner" context="{'group_by':'partner2'}" />
                     </group>
                 </search>
             </field>
         </record>
 
         <record id="action_contract_category_report_all" model="ir.actions.act_window">
-            <field name="name">合同分类资金汇总分析</field>
+            <field name="name">合同资金汇总分析</field>
             <field name="res_model">report.contract.fund_by_category</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,graph</field>
@@ -93,7 +96,7 @@
 
         <menuitem id="menu_contract_reporting" name="报表" 
             parent="menu_contract" sequence="4000" groups="group_contract_manager"/>
-        <menuitem action="action_contract_category_report_all" name="合同分类资金汇总分析"
+        <menuitem action="action_contract_category_report_all" name="合同资金汇总分析"
             id="menu_report_contract_fund_by_category" parent="menu_contract_reporting" sequence="1"/>
 
 

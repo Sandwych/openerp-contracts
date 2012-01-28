@@ -54,12 +54,14 @@ class ContractGroup(osv.osv):
         'paid_amount': fields.function(_paid_amount, method=True, string='已收付', type='float'),
         'paid_rate': fields.function(_paid_rate, method=True, string='资金进度', type='float'),
         'company_id': fields.many2one('res.company', '合同组所属机构', required=False),
+        'user_id': fields.many2one('res.users', '负责人', required=False),
     }
     _sql_constraints = [
         ('name', 'unique(name)', '分组名称必须唯一' )
     ]
     _order = 'start_date desc, end_date desc, name asc'
     _defaults = {
+        'user_id': lambda obj, cr, uid, context: uid,
         'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'contract.group', context=c),
     }
 
@@ -268,7 +270,7 @@ ContractLine()
 
 
 class ContractFundLine(osv.osv):
-    """ 款项收付计划 """
+    """ 收付款计划 """
     _name = 'contract.contract.fund_line'
     _description = 'Contract Fund Line'
 
@@ -317,7 +319,7 @@ ContractFundLine()
 
 
 class ContractFundPayment(osv.osv):
-    """ 款项收付记录 """
+    """ 收付款记录 """
     _name = 'contract.contract.fund_payment'
     _description = 'Contract Fund Payment'
 
@@ -330,7 +332,7 @@ class ContractFundPayment(osv.osv):
         return result
 
     _columns = {
-        'fund_line': fields.many2one('contract.contract.fund_line', '款项收付计划', required=True, ondelete='cascade', select=True),
+        'fund_line': fields.many2one('contract.contract.fund_line', '收付款计划', required=True, ondelete='cascade', select=True),
         'contract': fields.related('fund_line', 'contract_id', type='many2one', relation='contract.contract', string='合同', store=True, readonly=True),
         'name': fields.char('说明', size=256, required=True, select=True),
         'pay_date': fields.date('收付款日期', required=True),
