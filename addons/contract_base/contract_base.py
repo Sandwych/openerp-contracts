@@ -231,7 +231,7 @@ class Contract(osv.osv):
         'started': fields.function(_started, method=True, string='已生效', type='boolean'),
         'state': fields.selection([
                 ('draft', '草稿'),
-                ('confirmed', '已确认'),
+                ('confirmed', '正在履行'),
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
@@ -300,7 +300,7 @@ class ContractLine(osv.osv):
         'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
         'state': fields.selection([
                 ('draft', '草稿'),
-                ('confirmed', '已审核'),
+                ('confirmed', '正在履行'),
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
@@ -334,16 +334,6 @@ class ContractFundLine(osv.osv):
     _name = 'contract.contract.fund_line'
     _description = 'Contract Fund Line'
 
-    def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
-        result = {}
-        for o in self.browse(cursor, user, ids, context=context):
-            paid_amount = o.paid_amount
-            if paid_amount < 0.0001 or o.amount < 0.0001:
-                result[o.id] = 0.0
-            else:
-                result[o.id] = round(100.0 * o.paid_amount / o.amount, 2)
-        return result
-
     def _amount_rate(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
@@ -370,14 +360,13 @@ class ContractFundLine(osv.osv):
             readonly=True, states={'draft': [('readonly', False)]}),
         'amount_rate': fields.function(_amount_rate, method=True, string='资金百分比', type='float'),
         'paid_amount': fields.float('已收付金额', required=True),
-        'paid_rate': fields.function(_paid_rate, method=True, string='已收付进度', type='float'),
         'note': fields.text('备注'),
         'user_id': fields.many2one('res.users', '负责人', required=False, 
             readonly=True, states={'draft': [('readonly', False)]}),
         'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
         'state': fields.selection([
                 ('draft', '草稿'),
-                ('confirmed', '已审核'),
+                ('confirmed', '正在履行'),
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
