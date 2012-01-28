@@ -1,0 +1,17 @@
+/*  收付款计划流程   */
+
+digraph finite_state_machine {
+	node [ fontname="Microsoft Yahei", fontsize="10" ];
+	edge [ fontname="Microsoft Yahei", fontsize="10", color="blue", fontcolor="blue" ];
+
+	node [shape=ellipse]; 
+
+    "draft" [ label="[draft] 草稿", style="filled", fillcolor="#ccffcc"];
+    "wait" [ label="[wait] 等待收付款" ];
+    "aborted" [ label="[abort] 已终止", style="filled", fillcolor="#ffcccc"];
+    "done" [ label="[done] 已完成",  style="filled", fillcolor="#cccccc" ];
+
+	"draft" -> "wait" [ label = "审核通过" ];
+	"wait" -> "aborted" [ label = "终止" ];
+    "wait" -> "done" [ label = "完成收付款" ];
+ }

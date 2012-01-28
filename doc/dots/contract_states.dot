@@ -1,0 +1,38 @@
+/*  合同工作流   */
+
+digraph {
+	node [ fontname="Microsoft Yahei", fontsize="10" ];
+	edge [ fontname="Microsoft Yahei", fontsize="10", color="blue", fontcolor="blue" ];
+
+	node [shape=ellipse]; 
+
+    "draft" [ label="[draft] 草稿", style="filled", fillcolor="#ccffcc" ];
+    "router" [ label="[router] 路由节点", shape=rectangle];
+    "wait_payment" [ label="[wait_payment] 等待全部收付款" ];
+    "wait_delivery" [ label="[wait_delivery] 等待全部收发货" ];
+    "payment_done" [ label="[payment_done] 全部收付款完成" ];
+    "delivery_done" [ label="[delivery_done] 全部收发货完成" ];
+    "aborted" [ label="[abort] 已终止", style="filled", fillcolor="#ffcccc"];
+    "delivery_aborted" [ label="[delivery_abort] 收发货已终止", style="filled", fillcolor="#ffcccc"];
+    "payment_aborted" [ label="[payment_abort] 收付款已终止", style="filled", fillcolor="#ffcccc"];
+    "done" [ label="[done] 已完成",  style="filled", fillcolor="#cccccc" ];
+
+	"draft" -> "router" [ label = "审核通过" ];
+	"router" -> "aborted" [ label = "终止" ];
+	"router" -> "wait_payment" [ label = "无条件迁移" ];
+	"router" -> "wait_delivery" [ label = "无条件迁移" ];
+    subgraph cluster_0 {
+        label="收付款"
+        "wait_payment" -> "aborted" [ label = "终止" ];
+        "wait_payment" -> "payment_aborted" [ label = "取消收付款" ];
+        "wait_payment" -> "payment_done" [ label = "确认收付款" ];
+    }
+    subgraph cluster_1{
+        label="收发货"
+        "wait_delivery" -> "delivery_done" [ label = "确认收发货" ];
+        "wait_delivery" -> "aborted" [ label = "终止" ];
+        "wait_delivery" -> "delivery_aborted" [ label = "取消收发货" ];
+    }
+	"delivery_done" -> "done" [ label = "无条件迁移" ];
+	"payment_done" -> "done" [ label = "无条件迁移" ];
+ }
