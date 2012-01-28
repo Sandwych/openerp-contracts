@@ -31,7 +31,7 @@ class ContractFundReport(osv.osv):
                 MIN(c.id) "id", 
                 cat.name "name", 
                 SUM(fl.amount) "amount", 
-                SUM(fp.amount) "paid_amount", 
+                SUM(fl.paid_amount) "paid_amount", 
                 TO_CHAR(c.start_date, 'YYYY') "year",
                 TO_CHAR(c.start_date, 'MM') "month",
                 TO_CHAR(c.start_date, 'YYYY-MM-DD') "day",
@@ -43,7 +43,6 @@ class ContractFundReport(osv.osv):
                 c.company_id company_id
             FROM contract_contract c
             LEFT JOIN contract_contract_fund_line fl ON fl.contract_id = c.id
-            LEFT JOIN contract_contract_fund_payment fp ON fp.contract = c.id
             INNER JOIN contract_category cat ON cat.id = c.category
             GROUP BY c.id, cat.name, c.start_date, c.end_date, c.sign_date, c.partner2, c.company_id
 

@@ -3,6 +3,7 @@
 from osv import osv
 from osv import fields
 from tools.translate import _
+from tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import time
 from datetime import datetime
 
@@ -159,6 +160,14 @@ class Contract(osv.osv):
         reads = self.read(cr, uid, ids, ['code', 'name'], context, load='_classic_write')
         return [(x['id'], ('[' + x['code'] + '] ' + x['name'])) for x in reads]
 
+    def _started(self, cursor, user, ids, field_name, arg, context=None):
+        result = {}
+        now = datetime.now()
+        for o in self.browse(cursor, user, ids, context=context):
+            start_date = datetime.strptime(o.start_date, DEFAULT_SERVER_DATE_FORMAT)
+            result[o.id] = (o.state == 'confirmed') and start_date <= now
+        return result
+
     def _total_amount(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
@@ -206,6 +215,7 @@ class Contract(osv.osv):
         'sign_date': fields.date('订立日期', required=True),
         'start_date': fields.date('起始日期', required=True),
         'end_date': fields.date('截止日期', required=True),
+        'confirmed_date': fields.date('确认日期', required=False, readonly=True),
         'category': fields.many2one('contract.category', '合同分类', required=True),
         'fund_type': fields.related('category', 'fund_type', type='selection', string='资金性质', store=True, readonly=True),
         'partner1': fields.many2one('res.partner', '甲方', required=True),
@@ -218,13 +228,14 @@ class Contract(osv.osv):
         'paid_amount': fields.function(_paid_amount, method=True, string='已收付', type='float'),
         'paid_rate': fields.function(_paid_rate, method=True, string='资金进度', type='float'),
         'user_id': fields.many2one('res.users', '负责人', required=False),
+        'started': fields.function(_started, method=True, string='已生效', type='boolean'),
         'state': fields.selection([
                 ('draft', '草稿'),
-                ('confirmed', '已审核'),
+                ('confirmed', '已确认'),
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
-                ], '合同状态', readonly=True, select=True),
+                ], '合同状态', readonly=True, required=True, select=True),
     }
     _sql_constraints = [
         ('name', 'unique(name)', '合同号必须唯一' )
@@ -232,11 +243,32 @@ class Contract(osv.osv):
     _order = 'start_date desc, end_date desc, name asc'
     _defaults = {
         'code': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'contract.contract'),
-        'sign_date': lambda *a: time.strftime('%Y-%m-%d'),
+        'sign_date': lambda *a: time.strftime(DEFAULT_SERVER_DATE_FORMAT),
         'state': 'draft',
         'user_id': lambda obj, cr, uid, context: uid,
         'partner1': _get_default_partner,
     }
+
+    #各种业务方法
+    def action_dummy(self, cr, uid, ids, *args):
+        return True
+
+    def action_confirm(self, cr, uid, ids, *args):
+        for o in self.browse(cr, uid, ids):
+            if (not o.lines) and (not o.fund_lines):
+                raise osv.except_osv(u'错误', u'您不能确认没有标的物或款项的合同！')
+            values = { 
+                'state': 'confirmed',
+                'confirmed_date': time.strftime(DEFAULT_SERVER_DATE_FORMAT),
+            }
+            self.write(cr, uid, [o.id], values)
+            if o.lines:
+                self.pool.get('contract.contract.line').action_confirm(cr, uid, [x.id for x in o.lines])
+            if o.fund_lines:
+                self.pool.get('contract.contract.fund_line').action_confirm(cr, uid, [x.id for x in o.fund_lines])
+            message = u'合同“[%s] %s”已审核通过。' % (o.code, o.name,)
+            self.log(cr, uid, o.id, message)
+        return True
 
 Contract()
 
@@ -246,17 +278,40 @@ class ContractLine(osv.osv):
     _name = 'contract.contract.line'
     _description = 'Contract Detail'
     _columns = {
-        'contract_id': fields.many2one('contract.contract', '合同引用', required=True, ondelete='cascade', select=True),
-        'name': fields.char('说明', size=256, required=True, select=True),
-        'product': fields.many2one('product.product', '产品'),
-        'uom': fields.many2one('product.uom', '计量单位', required=True),
-        'quantity': fields.float('数量（按单位计）', digits=(16, 2), required=True),
-        'unit_price': fields.float('单价', required=True, digits=(16, 2)), #, readonly=True, states={'draft': [('readonly', False)]}),
-        'planned_date': fields.date('计划收付日期', required=True),
+        'contract_id': fields.many2one('contract.contract', '合同引用', required=True, ondelete='cascade', select=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'name': fields.char('说明', size=256, required=True, select=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'product': fields.many2one('product.product', '产品',
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'uom': fields.many2one('product.uom', '计量单位', required=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'quantity': fields.float('数量（按单位计）', digits=(16, 2), required=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'unit_price': fields.float('单价', required=True, digits=(16, 2),
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'planned_date': fields.date('计划收付日期', required=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'delivery_quantity': fields.float('实际收付数量（按单位计）', digits=(16, 2), required=True),
+        'delivery_date': fields.date('实际收付日期', required=False),
         'note': fields.text('备注'),
-        'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
+        'user_id': fields.many2one('res.users', '负责人', required=False,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
+        'state': fields.selection([
+                ('draft', '草稿'),
+                ('confirmed', '已审核'),
+                ('done', '完成'),
+                ('abort', '终止'),
+                ('cancel', '取消')
+                ], '合同状态', readonly=True, required=True, select=True),
     }
     _order = 'planned_date asc, id desc'
+    _defaults = {
+        'planned_date': lambda *a: time.strftime(DEFAULT_SERVER_DATE_FORMAT),
+        'state': 'draft',
+        'user_id': lambda obj, cr, uid, context: uid,
+    }
 
     def onchange_product(self, cr, uid, ids, product_id, quantity):
         v = {}
@@ -267,6 +322,10 @@ class ContractLine(osv.osv):
             v['name'] = product.name
         return {'value':v}
 
+    #各种业务方法
+    def action_confirm(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'confirmed'})
+
 ContractLine()
 
 
@@ -274,19 +333,6 @@ class ContractFundLine(osv.osv):
     """ 收付款计划 """
     _name = 'contract.contract.fund_line'
     _description = 'Contract Fund Line'
-
-    def _paid_amount(self, cursor, user, ids, field_name, arg, context=None):
-        result = {}
-        sql = '''
-        SELECT l.id, SUM(p.amount)
-            FROM contract_contract_fund_line l
-            LEFT JOIN contract_contract_fund_payment p ON p.fund_line = l.id
-            WHERE l.id IN %s GROUP BY l.id
-        '''
-        cursor.execute(sql, (tuple(ids),))
-        for lineid, amount_sum in cursor.fetchall():
-            result[lineid] = amount_sum
-        return result
 
     def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
@@ -309,32 +355,50 @@ class ContractFundLine(osv.osv):
         return result
 
     _columns = {
-        'contract_id': fields.many2one('contract.contract', '合同引用', required=True, ondelete='cascade', select=True),
-        'name': fields.char('说明', size=256, required=True, select=True),
-        'planned_date': fields.date('计划收付日期', required=True),
-        'type': fields.char('结算方式', size=256, required=True, select=True),
-        'payment_term': fields.char('资金条款', size=256, required=False),
-        'amount': fields.float('金额', required=True),
+        'contract_id': fields.many2one('contract.contract', '合同引用', required=True, ondelete='cascade', select=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'name': fields.char('说明', size=256, required=True, select=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'planned_date': fields.date('计划收付日期', required=True,
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'paid_date': fields.date('实际收付日期', required=False),
+        'type': fields.char('结算方式', size=256, required=True, select=True, 
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'payment_term': fields.char('资金条款', size=256, required=False, 
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'amount': fields.float('金额', required=True, 
+            readonly=True, states={'draft': [('readonly', False)]}),
         'amount_rate': fields.function(_amount_rate, method=True, string='资金百分比', type='float'),
-        'paid_amount': fields.function(_paid_amount, method=True, string='已收付金额', type='float'),
+        'paid_amount': fields.float('已收付金额', required=True),
         'paid_rate': fields.function(_paid_rate, method=True, string='已收付进度', type='float'),
         'note': fields.text('备注'),
-        'user_id': fields.many2one('res.users', '负责人', required=False),
-        'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
+        'user_id': fields.many2one('res.users', '负责人', required=False, 
+            readonly=True, states={'draft': [('readonly', False)]}),
+        'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
+        'state': fields.selection([
+                ('draft', '草稿'),
+                ('confirmed', '已审核'),
+                ('done', '完成'),
+                ('abort', '终止'),
+                ('cancel', '取消')
+                ], '合同状态', readonly=True, required=True, select=True),
     }
     _order = 'planned_date asc, id desc'
     _defaults = {
+        'planned_date': lambda *a: time.strftime(DEFAULT_SERVER_DATE_FORMAT),
         'user_id': lambda obj, cr, uid, context: uid,
+        'state': 'draft',
+        'paid_amount': 0.0,
     }
+
+    #各种业务方法
+    def action_confirm(self, cr, uid, ids, context=None):
+        return self.write(cr, uid, ids, {'state': 'confirmed'})
 
 ContractFundLine()
 
 
-class ContractFundPayment(osv.osv):
-    """ 收付款记录 """
-    _name = 'contract.contract.fund_payment'
-    _description = 'Contract Fund Payment'
-
+'''
     def _get_delayed_days(self, cursor, user, ids, field_name, arg, context=None):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
@@ -342,34 +406,5 @@ class ContractFundPayment(osv.osv):
             d2 = datetime.strptime(o.fund_line.planned_date, '%Y-%m-%d')
             result[o.id] = (d1 - d2).days
         return result
+'''
 
-    def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
-        result = {}
-        for o in self.browse(cursor, user, ids, context=context):
-            if o.planned_amount < 0.0001:
-                result[o.id] = 0.0
-            else:
-                result[o.id] = round(100.0 * o.amount / o.planned_amount, 2)
-        return result
-
-    _columns = {
-        'fund_line': fields.many2one('contract.contract.fund_line', '收付款计划', required=True, ondelete='cascade', select=True),
-        'contract': fields.related('fund_line', 'contract_id', type='many2one', relation='contract.contract', string='合同', store=True, readonly=True),
-        'name': fields.char('说明', size=256, required=True, select=True),
-        'pay_date': fields.date('收付款日期', required=True),
-        'planned_date': fields.related('fund_line', 'planned_date', type='date', string='合同计划日期', store=True, readonly=True),
-        'planned_amount': fields.related('fund_line', 'amount', type='float', string='合同计划金额', store=True, readonly=True),
-        'amount': fields.float('金额', required=True),
-        'paid_rate': fields.function(_paid_rate, method=True, string='收付款百分比', type='float'),
-        'delayed_days': fields.function(_get_delayed_days, method=True, string='延迟天数', type='integer'),
-        'note': fields.text('备注'),
-        'user_id': fields.many2one('res.users', '负责人', required=False),
-        'company_id': fields.related('fund_line', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True),
-    }
-    _order = 'pay_date desc, id desc'
-    _defaults = {
-        'user_id': lambda obj, cr, uid, context: uid,
-        'pay_date': lambda *a: time.strftime('%Y-%m-%d'),
-    }
-
-ContractFundPayment()
