@@ -231,6 +231,7 @@ class Contract(osv.osv):
     ]
     _order = 'start_date desc, end_date desc, name asc'
     _defaults = {
+        'code': lambda obj, cr, uid, context: obj.pool.get('ir.sequence').get(cr, uid, 'contract.contract'),
         'sign_date': lambda *a: time.strftime('%Y-%m-%d'),
         'state': 'draft',
         'user_id': lambda obj, cr, uid, context: uid,
@@ -291,10 +292,20 @@ class ContractFundLine(osv.osv):
         result = {}
         for o in self.browse(cursor, user, ids, context=context):
             paid_amount = o.paid_amount
-            if paid_amount < 0.0001:
+            if paid_amount < 0.0001 or o.amount < 0.0001:
                 result[o.id] = 0.0
             else:
                 result[o.id] = round(100.0 * o.paid_amount / o.amount, 2)
+        return result
+
+    def _amount_rate(self, cursor, user, ids, field_name, arg, context=None):
+        result = {}
+        for o in self.browse(cursor, user, ids, context=context):
+            contract_amount = o.contract_id.total_amount
+            if contract_amount < 0.0001:
+                result[o.id] = 0.0
+            else:
+                result[o.id] = round(100.0 * o.amount / contract_amount, 2)
         return result
 
     _columns = {
@@ -304,8 +315,9 @@ class ContractFundLine(osv.osv):
         'type': fields.char('结算方式', size=256, required=True, select=True),
         'payment_term': fields.char('资金条款', size=256, required=False),
         'amount': fields.float('金额', required=True),
+        'amount_rate': fields.function(_amount_rate, method=True, string='资金百分比', type='float'),
         'paid_amount': fields.function(_paid_amount, method=True, string='已收付金额', type='float'),
-        'paid_rate': fields.function(_paid_rate, method=True, string='已收付比率', type='float'),
+        'paid_rate': fields.function(_paid_rate, method=True, string='已收付进度', type='float'),
         'note': fields.text('备注'),
         'user_id': fields.many2one('res.users', '负责人', required=False),
         'company_id': fields.related('contract_id', 'company_id', type='many2one', relation='res.company', string='所属机构', store=True, readonly=True)
@@ -331,13 +343,24 @@ class ContractFundPayment(osv.osv):
             result[o.id] = (d1 - d2).days
         return result
 
+    def _paid_rate(self, cursor, user, ids, field_name, arg, context=None):
+        result = {}
+        for o in self.browse(cursor, user, ids, context=context):
+            if o.planned_amount < 0.0001:
+                result[o.id] = 0.0
+            else:
+                result[o.id] = round(100.0 * o.amount / o.planned_amount, 2)
+        return result
+
     _columns = {
         'fund_line': fields.many2one('contract.contract.fund_line', '收付款计划', required=True, ondelete='cascade', select=True),
         'contract': fields.related('fund_line', 'contract_id', type='many2one', relation='contract.contract', string='合同', store=True, readonly=True),
         'name': fields.char('说明', size=256, required=True, select=True),
         'pay_date': fields.date('收付款日期', required=True),
         'planned_date': fields.related('fund_line', 'planned_date', type='date', string='合同计划日期', store=True, readonly=True),
+        'planned_amount': fields.related('fund_line', 'amount', type='float', string='合同计划金额', store=True, readonly=True),
         'amount': fields.float('金额', required=True),
+        'paid_rate': fields.function(_paid_rate, method=True, string='收付款百分比', type='float'),
         'delayed_days': fields.function(_get_delayed_days, method=True, string='延迟天数', type='integer'),
         'note': fields.text('备注'),
         'user_id': fields.many2one('res.users', '负责人', required=False),

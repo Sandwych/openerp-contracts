@@ -21,6 +21,7 @@
         'contract_data.xml', #这行在开发完成之后放到 init_xml 里
         'contract_view.xml',
         'contract_workflow.xml',
+        'contract_sequence.xml',
         'report/contract_report_view.xml',
         'report/contract_report.xml',
     ],

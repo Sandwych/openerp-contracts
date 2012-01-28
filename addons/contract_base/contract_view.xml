@@ -207,6 +207,7 @@
                                     <field name="planned_date" />
                                     <field name="type" />
                                     <field name="payment_term" />
+                                    <field name="amount_rate" />
                                     <field name="amount" sum="计划收付总金额" />
                                     <field name="paid_amount" sum="已收付总金额" />
                                     <field name="paid_rate" widget="progressbar" />
@@ -295,6 +296,7 @@
                     <field name="planned_date" />
                     <field name="type" />
                     <field name="payment_term" />
+                    <field name="amount_rate" />
                     <field name="amount" sum="计划收付总金额" />
                     <field name="paid_amount" sum="已收付总金额" />
                     <field name="paid_rate" widget="progressbar" />
@@ -316,7 +318,9 @@
                         <field name="name" select="1" colspan="4" />
                         <field name="planned_date" select="1" />
                         <field name="pay_date" select="1" />
+                        <field name="planned_amount" />
                         <field name="amount" select="1" />
+                        <field name="paid_rate" />
                         <field name="user_id" select="1" />
                         <newline />
                         <field name="note" colspan="4" select="2" />
@@ -338,7 +342,9 @@
                     <field name="planned_date" />
                     <field name="pay_date" />
                     <field name="delayed_days" />
+                    <field name="planned_amount" />
                     <field name="amount"/>
+                    <field name="paid_rate" widget="progressbar" />
                 </tree>
             </field>
         </record>
