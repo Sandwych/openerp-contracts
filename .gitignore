@@ -2,6 +2,7 @@
 
 # Packages
 *.egg
+*.swp
 *.egg-info
 dist
 build
