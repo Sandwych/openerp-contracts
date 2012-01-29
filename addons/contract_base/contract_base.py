@@ -235,7 +235,7 @@ class Contract(osv.osv):
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
-                ], '合同状态', readonly=True, required=True, select=True),
+                ], '状态', readonly=True, required=True, select=True),
     }
     _sql_constraints = [
         ('name', 'unique(name)', '合同号必须唯一' )
@@ -304,7 +304,7 @@ class ContractLine(osv.osv):
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
-                ], '合同状态', readonly=True, required=True, select=True),
+                ], '状态', readonly=True, required=True, select=True),
     }
     _order = 'planned_date asc, id desc'
     _defaults = {
@@ -370,7 +370,7 @@ class ContractFundLine(osv.osv):
                 ('done', '完成'),
                 ('abort', '终止'),
                 ('cancel', '取消')
-                ], '合同状态', readonly=True, required=True, select=True),
+                ], '状态', readonly=True, required=True, select=True),
     }
     _order = 'planned_date asc, id desc'
     _defaults = {

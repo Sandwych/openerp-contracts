@@ -388,6 +388,7 @@
             <field name="name">合同收付货计划执行情况</field>
             <field name="res_model">contract.contract.line</field>
             <field name="view_mode">tree,form,calendar</field>
+            <field name="domain">[('state','=','confirmed')]</field>
         </record>
 
         <!-- 合同收付货菜单定义 -->
@@ -460,6 +461,7 @@
             <field name="name">合同收付款计划执行情况</field>
             <field name="res_model">contract.contract.fund_line</field>
             <field name="view_mode">tree,form</field>
+            <field name="domain">[('state','=','confirmed')]</field>
         </record>
 
         <!-- 合同收付款菜单定义 -->
