@@ -102,8 +102,8 @@ class Category(osv.osv):
             help="如果一个合同指定了属于此分类，那么将使用此模板文件打印合同文档。此模板应使用 .ODT 格式。"),
         'summary': fields.text('简介'),
         #下面两个是系统内部使用的字段
-        'parent_left': fields.integer('Left Parent', required=True),
-        'parent_right': fields.integer('Right Parent', required=True),
+        'parent_left': fields.integer('Left Parent', select=True),
+        'parent_right': fields.integer('Right Parent', select=True),
     }
     _sql_constraints = [
         ('name', 'unique(name)', '分类名称必须唯一' )
